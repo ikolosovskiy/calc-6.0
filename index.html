@@ -12,21 +12,9 @@
       padding: 20px;
       display: flex;
       justify-content: center;
-      align-items: flex-start; /* Змінено, щоб логотипи були зверху */
-      min-height: 100vh;
-      flex-direction: column; /* Додаємо колонкове розташування */
-    }
-    .logo-container {
-      width: 100%;
-      max-width: 800px;
-      margin: 0 auto 10px auto;
-      display: flex;
-      justify-content: space-between;
       align-items: center;
-    }
-    .logo-container img {
-      max-height: 60px; /* Приклад обмеження висоти логотипів */
-      margin: 5px;
+      min-height: 100vh;
+      flex-direction: column;
     }
     .calculator {
       background: #fff;
@@ -35,7 +23,14 @@
       max-width: 500px;
       width: 100%;
       padding: 30px;
-      margin: 0 auto; /* Вирівнюємо по центру */
+      margin: 0 auto;
+    }
+    .logo-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo-container img {
+      max-height: 60px;
     }
     .calculator h2 {
       text-align: center;
@@ -160,7 +155,7 @@
       visibility: visible;
       opacity: 1;
     }
-    /* Стилі для дисклеймера внизу сторінки */
+    /* Дисклеймер внизу сторінки */
     .bottom-disclaimer {
       max-width: 500px;
       margin: 10px auto;
@@ -172,13 +167,12 @@
   </style>
 </head>
 <body>
-  <!-- Блок логотипів -->
-  <div class="logo-container">
-    <!-- Замість SRC підставте потрібні шляхи до логотипів -->
-    <img src="logo.png">
-  </div>
-
+  <!-- Логотип всередині контейнера калькулятора -->
   <div class="calculator">
+    <div class="logo-container">
+      <img src="logo.png" alt="Logo">
+    </div>
+    
     <h2>Орієнтовний калькулятор субсидії на оренду житла для ВПО* </h2>
     <h7>*Остаточний розрахунок можна отримати при зверненні до Пенсійного Фонду України.</h7>
     
@@ -251,8 +245,8 @@
     
     <div class="result" id="result"></div>
   </div>
-
-  <!-- Дисклеймер внизу сторінки -->
+  
+  <!-- Дисклеймер у нижній частині сторінки -->
   <div class="bottom-disclaimer">
     Цей калькулятор підготовано за підтримки Агентства ООН у справах біженців (УВКБ ООН). Зміст калькулятора виключно є відповідальністю Благодійної організації «Благодійний фонд “Стабілізейшен Суппорт Сервісез”» і жодним чином не відображає поглядів УВКБ ООН.
   </div>
@@ -322,10 +316,7 @@
       if (settlementType) {
         const regions = Object.keys(regionCoefficients[settlementType]);
         regions.forEach(region => {
-          // Якщо обрано "city" (обласний центр), виключаємо "Київська"
-          if (settlementType === "city" && region === "Київська") {
-            return;
-          }
+          if (settlementType === "city" && region === "Київська") return;
           const option = document.createElement('option');
           option.value = region;
           option.textContent = region;
