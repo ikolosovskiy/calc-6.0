@@ -155,7 +155,7 @@
       visibility: visible;
       opacity: 1;
     }
-    /* Дисклеймер внизу сторінки */
+    /* Дисклеймер у нижній частині сторінки */
     .bottom-disclaimer {
       max-width: 500px;
       margin: 10px auto;
@@ -248,14 +248,14 @@
   
   <!-- Дисклеймер у нижній частині сторінки -->
   <div class="bottom-disclaimer">
-    Цей калькулятор підготовано за підтримки Агентства ООН у справах біженців в Україні (УВКБ ООН). Зміст орієнтовного калькулятора виключно є відповідальністю Благодійної організації «Благодійний фонд “Стабілізейшен Суппорт Сервісез”» і жодним чином не відображає поглядів УВКБ ООН.
+    Цей орієнтовний калькулятор підготовано за підтримки Агентства ООН у справах біженців в Україні (УВКБ ООН). Зміст орієнтовного калькулятора виключно є відповідальністю Благодійної організації «Благодійний фонд “Стабілізейшен Суппорт Сервісез”» і жодним чином не відображає поглядів УВКБ ООН.
   </div>
   
   <script>
-    // Оновлено вартість квадратного метра житлового приміщення згідно з новими даними:
+    // Оновлено вартість квадратного метру згідно з новими даними:
     const costPerSqM = 208.0; // 208 грн/м² (січень 2025 р.)
     const pm = 2920; // Прожитковий мінімум на одну особу
-
+    
     const regionCoefficients = {
       city: {
         'Вінницька': 1.08,
@@ -311,7 +311,7 @@
         'Чернігівська': 0.44
       }
     };
-
+    
     function updateRegionOptions() {
       const settlementType = document.getElementById('settlementType').value;
       const regionSelect = document.getElementById('region');
@@ -330,7 +330,7 @@
       
       document.getElementById('regionalCoefficient').value = '';
     }
-
+    
     function updateCoefficient() {
       const settlementType = document.getElementById('settlementType').value;
       const region = document.getElementById('region').value;
@@ -346,7 +346,7 @@
         document.getElementById('regionalCoefficient').value = '';
       }
     }
-
+    
     function calculateSubsidy() {
       const income = parseFloat(document.getElementById('income').value);
       const familyMembers = parseInt(document.getElementById('familyMembers').value);
@@ -374,12 +374,13 @@
         }
       }
       
-      // Гранична вартість оренди житла: G = costPerSqM * socialNorm * (коригувальний коефіцієнт)
+      // Гранична вартість оренди житла: 
+      // G = costPerSqM * socialNorm * (коригувальний коефіцієнт)
       let G = costPerSqM * socialNorm * regionalCoefficient;
       G = parseFloat(G.toFixed(2));
       
       const incomePerPerson = income / familyMembers;
-      // Обчислюємо обов’язковий відсоток платежу:
+      // Обчислюємо обов’язковий відсоток платежу Rₒ:
       // Якщо incomePerPerson >= 2*pm (5840 грн), Rₒ = 20, інакше за формулою:
       let R_o;
       if (incomePerPerson >= 2 * pm) {
@@ -389,6 +390,7 @@
       }
       const B = parseFloat((income * (R_o / 100)).toFixed(2));
       
+      // Теоретична субсидія – це різниця між граничною вартістю і обов’язковим платежем:
       const theoreticalSubsidy = G - B;
       
       let resultHtml = '<div class="title">Результати розрахунку* </div>';
@@ -397,8 +399,9 @@
         resultHtml += '<p><strong>Сума, яку доплачує родина:</strong> -</p>';
         resultHtml += '<p><strong>Гранична вартість оренди житла:</strong> ' + G.toFixed(2) + ' грн</p>';
       } else {
-        const finalSubsidy = parseFloat(Math.min(theoreticalSubsidy, actualRent).toFixed(2));
-        const familyContribution = parseFloat((actualRent - finalSubsidy).toFixed(2));
+        const finalSubsidy = parseFloat((theoreticalSubsidy).toFixed(2));
+        // Згідно з новим алгоритмом, сума, яку доплачує родина, дорівнює обов’язковому платежу (B)
+        const familyContribution = B;
         resultHtml += '<p><strong>Орієнтовний розмір субсидії:</strong> ' + finalSubsidy.toFixed(2) + ' грн</p>';
         resultHtml += '<p><strong>Сума, яку доплачує родина:</strong> ' + familyContribution.toFixed(2) + ' грн</p>';
         resultHtml += '<p><strong>Гранична вартість оренди житла:</strong> ' + G.toFixed(2) + ' грн</p>';
