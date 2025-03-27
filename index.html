@@ -350,6 +350,7 @@
     function calculateSubsidy() {
       const income = parseFloat(document.getElementById('income').value);
       const familyMembers = parseInt(document.getElementById('familyMembers').value);
+      const settlementType = document.getElementById('settlementType').value;
       const regionalCoefficient = parseFloat(document.getElementById('regionalCoefficient').value);
       const actualRent = parseFloat(document.getElementById('actualRent').value);
       
@@ -361,9 +362,7 @@
         return;
       }
       
-      // Розрахунок соціальної норми:
-      // Якщо домогосподарство складається з однієї особи, норма = 35.22 кв.м.
-      // Якщо більше – норма = 13.65 кв.м на кожного, але не менше ніж 35.22 кв.м.
+      // 1) Визначаємо соціальну норму (мінімум 35.22 м², 13.65 м² на кожного)
       let socialNorm;
       if (familyMembers === 1) {
         socialNorm = 35.22;
@@ -374,14 +373,19 @@
         }
       }
       
-      // Гранична вартість оренди житла: 
-      // G = costPerSqM * socialNorm * (коригувальний коефіцієнт)
+      // 2) Обмеження: якщо обчислена соціальна норма перевищує фактичну площу житла,
+      //   оскільки розрахунок субсидії не може перевищувати фактичну орендну суму,
+      //   субсидія не може бути більшою за actualRent.
+      // Застосовуємо це обмеження під час розрахунку фінальної субсидії.
+      
+      // 3) Гранична вартість оренди житла: 
+      //    G = costPerSqM * socialNorm * (коригувальний коефіцієнт)
       let G = costPerSqM * socialNorm * regionalCoefficient;
       G = parseFloat(G.toFixed(2));
       
       const incomePerPerson = income / familyMembers;
-      // Обчислюємо обов’язковий відсоток платежу Rₒ:
-      // Якщо incomePerPerson >= 2*pm (5840 грн), Rₒ = 20, інакше за формулою:
+      // 4) Розрахунок обов’язкового відсотка платежу Rₒ:
+      //    Якщо incomePerPerson >= 2*pm (5840 грн), Rₒ = 20, інакше за формулою:
       let R_o;
       if (incomePerPerson >= 2 * pm) {
         R_o = 20;
@@ -390,8 +394,14 @@
       }
       const B = parseFloat((income * (R_o / 100)).toFixed(2));
       
-      // Теоретична субсидія – це різниця між граничною вартістю і обов’язковим платежем:
+      // 5) Теоретична субсидія = G - B
       const theoreticalSubsidy = G - B;
+      
+      // 6) Фінальна субсидія не може перевищувати фактичну орендну плату:
+      const finalSubsidy = parseFloat(Math.min(theoreticalSubsidy, actualRent).toFixed(2));
+      
+      // 7) Сума, яку доплачує родина = actualRent - finalSubsidy
+      const familyContribution = parseFloat((actualRent - finalSubsidy).toFixed(2));
       
       let resultHtml = '<div class="title">Результати розрахунку* </div>';
       if (theoreticalSubsidy <= 0) {
@@ -399,16 +409,12 @@
         resultHtml += '<p><strong>Сума, яку доплачує родина:</strong> -</p>';
         resultHtml += '<p><strong>Гранична вартість оренди житла:</strong> ' + G.toFixed(2) + ' грн</p>';
       } else {
-        const finalSubsidy = parseFloat((theoreticalSubsidy).toFixed(2));
-        // Згідно з новим алгоритмом, сума, яку доплачує родина, дорівнює обов’язковому платежу (B)
-        const familyContribution = B;
         resultHtml += '<p><strong>Орієнтовний розмір субсидії:</strong> ' + finalSubsidy.toFixed(2) + ' грн</p>';
         resultHtml += '<p><strong>Сума, яку доплачує родина:</strong> ' + familyContribution.toFixed(2) + ' грн</p>';
         resultHtml += '<p><strong>Гранична вартість оренди житла:</strong> ' + G.toFixed(2) + ' грн</p>';
       }
       
       resultHtml += '<p class="disclaimer">*Даний розрахунок є орієнтовним і не гарантує отримання субсидії</p>';
-      
       document.getElementById('result').innerHTML = resultHtml;
     }
   </script>
